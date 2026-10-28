@@ -1,7 +1,11 @@
 """Local web dashboard for tools/convert.py.
 
-Run from the repository root with:
+Run from the repository root with the ComfyUI Python environment:
     python tools\\conversion_webui.py
+
+A pythonXX._pth file next to the interpreter (ComfyUI Windows portable) puts
+CPython into PEP 690 safe-path mode, so the script directory is not added to
+sys.path and PYTHONPATH is ignored; the fallback import below re-adds it.
 """
 
 from __future__ import annotations
@@ -25,7 +29,8 @@ from urllib.parse import urlparse
 
 try:
     from .convert import QUANT_TYPE_MAP
-except ImportError:
+except ImportError:  # direct script run, or PEP 690 safe-path (pythonXX._pth)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
     from convert import QUANT_TYPE_MAP
 
 
