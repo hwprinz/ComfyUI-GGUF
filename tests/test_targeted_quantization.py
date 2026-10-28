@@ -2667,6 +2667,17 @@ class Qwen3VLConverterTests(unittest.TestCase):
         )
         self.assertFalse(any(name.startswith("model.visual.") for name in tensor_types))
 
+    def test_rejects_qwen3vl_hint_without_a_detected_variant(self):
+        # A hand-built SourceStateDict may carry the qwen3vl hint without ever
+        # going through normalize_qwen3vl_state_dict, so no size was detected.
+        # Guessing a variant would stamp the GGUF with the wrong size.
+        state_dict = SourceStateDict(
+            [("blk.0.attn_q.weight", torch.ones((4, 4), dtype=torch.bfloat16))],
+            architecture_hint="qwen3vl",
+        )
+        with self.assertRaisesRegex(ValueError, "did not report its size"):
+            detect_arch(state_dict)
+
     def test_rejects_a_layout_mixing_the_two_sizes(self):
         language_shapes, visual_shapes, source = synthetic_qwen3vl_layout()
         mixed = OrderedDict(source)

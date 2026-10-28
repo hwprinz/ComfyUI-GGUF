@@ -792,7 +792,10 @@ def _qwen3vl_arch(variant=None):
     """A ModelQwen3VL carrying the checkpoint size to record in the GGUF metadata."""
     model_arch = ModelQwen3VL()
     if variant is None:
-        return model_arch
+        raise ValueError(
+            "Qwen3-VL source did not report its size; cannot choose between "
+            "the supported variants."
+        )
     supported = {spec["variant"] for spec in qwen3vl_variant_specs()}
     if variant not in supported:
         raise ValueError(
@@ -816,7 +819,7 @@ def add_model_metadata(writer, model_arch):
         writer.add_bool(QWEN3VL_TEXT_ONLY_METADATA, True)
         writer.add_string(
             QWEN3VL_VARIANT_METADATA,
-            getattr(model_arch, "qwen3vl_variant", "4b"),
+            model_arch.qwen3vl_variant,
         )
 
 
